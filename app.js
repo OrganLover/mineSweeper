@@ -99,15 +99,12 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
       cell.style.background = `url(./assets/minesweeper-sprites/bombs_around_count_${minesCount}.png)`
       return
     }
-    else {
-      cell.style.background = "url(./assets/minesweeper-sprites/opened_cell.png)"
-      for (let x = -1; x <= 1; x++) {
-        for (let y = -1; y <= 1; y++) {
-          openCell(row + y, column + x)
-        }
+    cell.style.background = "url(./assets/minesweeper-sprites/opened_cell.png)"
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
+        openCell(row + y, column + x)
       }
     }
-
   }
 
   function getMinesCount(row, column) {
@@ -123,6 +120,7 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
   }
 
   function isBomb(row, column) {
+    if (!isValid(row, column)) return false
     const index = row * width + column
 
     return bombsIndexes.includes(index)
