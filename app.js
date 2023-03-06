@@ -11,9 +11,24 @@ getReadyGame()
 
 function getReadyGame(width = 16, height = 16, bombsCount = 40) {
 
-  let timer
+  //  namespace for images
+  const bomb = 'url("./assets/minesweeper-sprites/bomb.png")'
+  const questionMark = 'url("./assets/minesweeper-sprites/question_mark.png")'
+  const redFlag = 'url("./assets/minesweeper-sprites/red_flag.png")'
+  const openedCell = 'url("./assets/minesweeper-sprites/opened_cell.png")'
+  const untouchedCell = 'url("./assets/minesweeper-sprites/untouched_cell.png")'
 
   setBombsCounter(bombsCount)
+  let timer
+  let bombsCounter = bombsCount
+  let redFlagsCount = bombsCount
+  let cellsCount = width * height
+  gameField.innerHTML = '<button></button>'.repeat(cellsCount)
+  const cells = [...gameField.children]
+
+  bombsIndexes = [...Array(cellsCount).keys()]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, bombsCount)
 
   reactionImage.addEventListener('mousedown', (e) => {
     e.preventDefault()
@@ -26,14 +41,6 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
     stopTimer()
     getReadyGame()
   })
-
-  let cellsCount = width * height
-  gameField.innerHTML = '<button></button>'.repeat(cellsCount)
-  const cells = [...gameField.children]
-
-  bombsIndexes = [...Array(cellsCount).keys()]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, bombsCount)
 
   gameField.addEventListener('click', (e) => {
     if (e.target.tagName !== 'BUTTON') {
@@ -48,13 +55,40 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
 
   })
 
+  gameField.addEventListener('contextmenu', (e) => {
+    e.preventDefault()
+  })
+
   gameField.addEventListener('mousedown', (e) => {
     e.preventDefault()
     if (e.target.tagName !== 'BUTTON') {
       return
     }
-    reactionImage.src = './assets/minesweeper-sprites/impress_face.png'
-    e.target.style.background = `url('./assets/minesweeper-sprites/opened_cell.png')`
+    if (e.button === 0) {
+      reactionImage.src = './assets/minesweeper-sprites/impress_face.png'
+      e.target.style.background = openedCell
+    }
+    else if (e.button === 2) {
+      debugger
+      if (e.target.style.background === untouchedCell || e.target.style.background === "") {
+        if (redFlagsCount > 0) {
+          e.target.style.background = redFlag
+          --redFlagsCount
+          setBombsCounter(--bombsCounter)
+        }
+        else {
+          e.target.style.background = questionMark
+        }
+      }
+      else if (e.target.style.background === redFlag) {
+        e.target.style.background = questionMark
+        ++redFlagsCount
+        setBombsCounter(++bombsCounter)
+      }
+      else if (e.target.style.background === questionMark) {
+        e.target.style.background = untouchedCell
+      }
+    }
   })
 
   gameField.addEventListener('mouseup', (e) => {
@@ -152,6 +186,7 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
   function startTimer() {
     seconds = 0
     timer = setInterval(() => {
+      seconds++
       const currentSecond = String(seconds)
       secondsArray = ([...currentSecond])
       if (secondsArray.length === 1) {
@@ -166,7 +201,6 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
         timerTwoDigitNumber.src = `./assets/minesweeper-sprites/timer_${secondsArray[1]}.png`
         timerThreeDigitNumber.src = `./assets/minesweeper-sprites/timer_${secondsArray[0]}.png`
       }
-      seconds++
     }, 1000)
   }
 
@@ -178,10 +212,13 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
     const bombsArr = [...String(bombsCount)]
     if (bombsArr.length === 1) {
       bombsOneDigitNumber.src = `./assets/minesweeper-sprites/timer_${bombsArr[0]}.png`
+      bombsTwoDigitNumber.src = `./assets/minesweeper-sprites/timer_0.png`
+      bombsThreeDigitNumber.src = `./assets/minesweeper-sprites/timer_0.png`
     }
     else if (bombsArr.length === 2) {
       bombsOneDigitNumber.src = `./assets/minesweeper-sprites/timer_${bombsArr[1]}.png`
       bombsTwoDigitNumber.src = `./assets/minesweeper-sprites/timer_${bombsArr[0]}.png`
+      bombsThreeDigitNumber.src = `./assets/minesweeper-sprites/timer_0.png`
     }
     else if (bombsArr.length === 3) {
       bombsOneDigitNumber.src = `./assets/minesweeper-sprites/timer_${bombsArr[2]}.png`
