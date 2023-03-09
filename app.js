@@ -26,9 +26,7 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
   gameField.innerHTML = '<button></button>'.repeat(cellsCount)
   const cells = [...gameField.children]
 
-  bombsIndexes = [...Array(cellsCount).keys()]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, bombsCount)
+  let bombsIndexes = []
 
   reactionImage.addEventListener('mousedown', (e) => {
     e.preventDefault()
@@ -105,26 +103,30 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
 
     const index = row * width + column
     const cell = cells[index]
-    const minesCount = getMinesCount(row, column)
+    let minesCount = getMinesCount(row, column)
 
     if (cell.disabled) return
 
     cell.disabled = true
 
     if (isBomb(row, column)) {
-      cell.style.background = "url(./assets/minesweeper-sprites/bomb.png)"
+      cell.style.background = bomb
       gameOver()
       return
     }
+
+    cellsCount--
 
     if (cellsCount <= bombsCount) {
       victory()
       return
     }
 
-    cellsCount--
-
     if (cellsCount === (width * height - 1)) {
+      bombsIndexes = [...Array(cellsCount).keys()]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, bombsCount)
+      minesCount = getMinesCount(row, column)
       stopTimer()
       startTimer()
     }
@@ -133,7 +135,7 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
       cell.style.background = `url(./assets/minesweeper-sprites/bombs_around_count_${minesCount}.png)`
       return
     }
-    cell.style.background = "url(./assets/minesweeper-sprites/opened_cell.png)"
+    cell.style.background = openedCell
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
         openCell(row + y, column + x)
@@ -145,8 +147,10 @@ function getReadyGame(width = 16, height = 16, bombsCount = 40) {
     count = 0
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
-        if (isBomb(row + y, column + x)) {
-          count++
+        if (isValid(row + y, column + x)) {
+          if (isBomb(row + y, column + x)) {
+            count++
+          }
         }
       }
     }
